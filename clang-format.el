@@ -150,7 +150,7 @@ is no active region.  If no style is given uses `clang-format-style'."
 
                        "-output-replacements-xml"
                        (if (buffer-file-name)
-                           (concat "-assume-filename " (buffer-file-name)))
+                           (concat "-assume-filename " (buffer-file-name)) "")
                        "-style" style
                        "-offset" (number-to-string file-start)
                        "-length" (number-to-string (- file-end file-start))
