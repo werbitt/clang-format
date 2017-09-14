@@ -143,18 +143,18 @@ is no active region.  If no style is given uses `clang-format-style'."
         ;; otherwise the offsets calculated above are off.  For simplicity, we
         ;; always use ‘utf-8-unix’ and ignore the buffer coding system.
         (default-process-coding-system '(utf-8-unix . utf-8-unix)))
-    (unwind-protect
-        (let ((status (call-process-region
-                       nil nil clang-format-executable
-                       nil `(,temp-buffer ,temp-file) nil
 
-                       "-output-replacements-xml"
-                       (if (buffer-file-name)
-                           (concat "-assume-filename " (buffer-file-name)) "")
-                       "-style" style
-                       "-offset" (number-to-string file-start)
-                       "-length" (number-to-string (- file-end file-start))
-                       "-cursor" (number-to-string cursor)))
+    (unwind-protect
+        (let ((status (apply 'call-process-region
+                             (append `(nil nil ,clang-format-executable
+                                           nil (,temp-buffer ,temp-file) nil)
+                                     '("-output-replacements-xml")
+                                     (if (buffer-file-name)
+                                         `("-assume-filename" ,(buffer-file-name)) nil)
+                                     `("-style" ,style
+                                       "-offset" ,(number-to-string file-start)
+                                       "-length" ,(number-to-string (- file-end file-start))
+                                       "-cursor" ,(number-to-string cursor)))))
               (stderr (with-temp-buffer
                         (unless (zerop (cadr (insert-file-contents temp-file)))
                           (insert ": "))
