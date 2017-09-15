@@ -119,7 +119,7 @@ is a zero-based file offset, assuming ‘utf-8-unix’ coding."
       (byte-to-position (1+ byte)))))
 
 ;;;###autoload
-(defun clang-format-region (start end &optional style)
+(defun clang-format-region (start end &optional style assume-file)
   "Use clang-format to format the code between START and END according to STYLE.
 If called interactively uses the region or the current statement if there
 is no active region.  If no style is given uses `clang-format-style'."
@@ -130,6 +130,9 @@ is no active region.  If no style is given uses `clang-format-style'."
 
   (unless style
     (setq style clang-format-style))
+
+  (unless assume-file
+    (setq assume-file buffer-file-name))
 
   (let ((file-start (clang-format--bufferpos-to-filepos start 'approximate
                                                         'utf-8-unix))
@@ -149,8 +152,8 @@ is no active region.  If no style is given uses `clang-format-style'."
                              (append `(nil nil ,clang-format-executable
                                            nil (,temp-buffer ,temp-file) nil)
                                      '("-output-replacements-xml")
-                                     (if (buffer-file-name)
-                                         `("-assume-filename" ,(buffer-file-name)) nil)
+                                     (if assume-file
+                                         `("-assume-filename" ,assume-file) nil)
                                      `("-style" ,style
                                        "-offset" ,(number-to-string file-start)
                                        "-length" ,(number-to-string (- file-end file-start))
@@ -182,10 +185,10 @@ is no active region.  If no style is given uses `clang-format-style'."
       (when (buffer-name temp-buffer) (kill-buffer temp-buffer)))))
 
 ;;;###autoload
-(defun clang-format-buffer (&optional style)
+(defun clang-format-buffer (&optional style assume-file)
   "Use clang-format to format the current buffer according to STYLE."
   (interactive)
-  (clang-format-region (point-min) (point-max) style))
+  (clang-format-region (point-min) (point-max) style assume-file))
 
 ;;;###autoload
 (defalias 'clang-format 'clang-format-region)
