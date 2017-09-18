@@ -158,6 +158,7 @@ is no active region.  If no style is given uses `clang-format-style'."
                                        "-offset" ,(number-to-string file-start)
                                        "-length" ,(number-to-string (- file-end file-start))
                                        "-cursor" ,(number-to-string cursor)))))
+        (let ((status (apply #'call-process-region
               (stderr (with-temp-buffer
                         (unless (zerop (cadr (insert-file-contents temp-file)))
                           (insert ": "))
